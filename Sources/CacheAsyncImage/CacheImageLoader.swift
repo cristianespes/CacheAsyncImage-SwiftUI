@@ -11,7 +11,15 @@ private var cache: [String: Image] = [:]
 @MainActor
 final class ImageCache {
     
-    private let storageDirectory: URL = URL.temporaryDirectory
+    private let storageDirectory: URL
+    
+    init() {
+        if #available(iOS 16.0, *) {
+            storageDirectory = URL.temporaryDirectory
+        } else {
+            storageDirectory = FileManager.default.temporaryDirectory
+        }
+    }
     
     func getImage(url: URL?) async -> Image? {
         guard let url else { return nil }
@@ -34,14 +42,26 @@ private extension ImageCache {
         
         let imageUrl = storageDirectory.appendingPathComponent(id)
         
-        if FileManager.default.fileExists(atPath: imageUrl.path()),
-           let uiImage = UIImage(contentsOfFile: imageUrl.path()) {
-            let image = Image(uiImage: uiImage)
-            cache[id] = image
-            
-            return image
+        if #available(iOS 16.0, *) {
+            if FileManager.default.fileExists(atPath: imageUrl.path()),
+               let uiImage = UIImage(contentsOfFile: imageUrl.path()) {
+                let image = Image(uiImage: uiImage)
+                cache[id] = image
+                
+                return image
+            } else {
+                return nil
+            }
         } else {
-            return nil
+            if FileManager.default.fileExists(atPath: imageUrl.path),
+               let uiImage = UIImage(contentsOfFile: imageUrl.path) {
+                let image = Image(uiImage: uiImage)
+                cache[id] = image
+                
+                return image
+            } else {
+                return nil
+            }
         }
     }
     
