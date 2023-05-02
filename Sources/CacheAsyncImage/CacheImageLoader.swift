@@ -24,7 +24,7 @@ final class ImageCache {
     func getImage(url: URL?) async -> Image? {
         guard let url else { return nil }
         
-        if let localImage = fetchImageFromLocal(for: url.lastPathComponent) {
+        if let localImage = fetchImageFromLocal(for: getID(for: url)) {
             return localImage
         } else {
             return await fetchImageFromNetwork(for: url)
@@ -77,7 +77,7 @@ private extension ImageCache {
             
             let image = Image(uiImage: uiImage)
             
-            let id = url.lastPathComponent
+            let id = getID(for: url)
             cache[id] = image
             saveImage(withID: id, data: data)
             
@@ -104,6 +104,16 @@ private extension ImageCache {
             print(error.localizedDescription)
             #endif
         }
+    }
+    
+    private func getID(for url: URL) -> String {
+        var id = url.relativePath
+        
+        if id.hasPrefix("/") {
+            id.remove(at: id.startIndex)
+        }
+        
+        return id.replacingOccurrences(of: "/", with: "_")
     }
     
 }

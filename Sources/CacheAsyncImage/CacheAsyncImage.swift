@@ -39,8 +39,8 @@ public struct CacheAsyncImage<I: View, P: View, E: View>: View {
             }
         }
         .task {
-            if value != nil { return }
-            self.value = await ImageCache().getImage(url: url)
+            guard value == nil else { return }
+            value = await ImageCache().getImage(url: url)
             showPlaceholder = false
         }
     }
