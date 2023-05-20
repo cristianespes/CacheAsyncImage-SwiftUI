@@ -8,19 +8,21 @@ import SwiftUI
 
 private var cache: [String: Image] = [:]
 
-@MainActor
 final class ImageCache {
     
     private let storageDirectory: URL
+    private let enabledLogs: Bool
     
-    init() {
+    init(enabledLogs: Bool) {
         if #available(iOS 16.0, *) {
             storageDirectory = URL.temporaryDirectory
         } else {
             storageDirectory = FileManager.default.temporaryDirectory
         }
+        self.enabledLogs = enabledLogs
     }
     
+    @MainActor
     func getImage(url: URL?) async -> Image? {
         guard let url else { return nil }
         
@@ -84,7 +86,9 @@ private extension ImageCache {
             return image
         } catch (let error) {
             #if DEBUG
-            print(error.localizedDescription)
+            if enabledLogs {
+                print(error.localizedDescription)
+            }
             #endif
             return nil
         }
@@ -93,15 +97,18 @@ private extension ImageCache {
     func saveImage(withID id: String, data: Data) {
         let imagePath = storageDirectory.appendingPathComponent(id)
         
-        #if DEBUG
-        print("Saved image at path: \(imagePath)")
-        #endif
-        
         do {
             try data.write(to: imagePath, options: .atomicWrite)
+            #if DEBUG
+            if enabledLogs {
+                print("Saved image at path: \(imagePath)")
+            }
+            #endif
         } catch (let error) {
             #if DEBUG
-            print(error.localizedDescription)
+            if enabledLogs {
+                print(error.localizedDescription)
+            }
             #endif
         }
     }

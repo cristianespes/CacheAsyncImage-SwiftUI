@@ -13,7 +13,10 @@ public struct CacheAsyncImage<I: View, P: View, E: View>: View {
     @ViewBuilder let placeholder: () -> P
     @ViewBuilder let error: () -> E
     
+    private let imageCache: ImageCache
+    
     public init(url: URL?,
+                enableLogs: Bool = false,
                 @ViewBuilder image: @escaping (Image) -> I,
                 @ViewBuilder placeholder: @escaping () -> P,
                 @ViewBuilder error: @escaping () -> E) {
@@ -21,6 +24,8 @@ public struct CacheAsyncImage<I: View, P: View, E: View>: View {
         self.image = image
         self.placeholder = placeholder
         self.error = error
+        
+        imageCache = ImageCache(enabledLogs: enableLogs)
     }
     
     @State private var showPlaceholder: Bool = true
@@ -40,7 +45,7 @@ public struct CacheAsyncImage<I: View, P: View, E: View>: View {
         }
         .task {
             guard value == nil else { return }
-            value = await ImageCache().getImage(url: url)
+            value = await imageCache.getImage(url: url)
             showPlaceholder = false
         }
     }
