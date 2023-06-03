@@ -77,6 +77,8 @@ private extension ImageCache {
             guard (response as? HTTPURLResponse)?.statusCode == 200,
                   let uiImage = UIImage(data: data) else { return nil }
             
+            try Task.checkCancellation()
+            
             let maxByte = 524_288 // 0.5MB
             let compressedUiImage = await uiImage.compress(toByte: maxByte)
             let image = Image(uiImage: compressedUiImage ?? uiImage)
@@ -100,7 +102,7 @@ private extension ImageCache {
         let imagePath = storageDirectory.appendingPathComponent(id)
         
         do {
-            try data.write(to: imagePath, options: .atomicWrite)
+            try data.write(to: imagePath, options: .atomic)
             #if DEBUG
             if enabledLogs {
                 print("Saved image at path: \(imagePath)")
