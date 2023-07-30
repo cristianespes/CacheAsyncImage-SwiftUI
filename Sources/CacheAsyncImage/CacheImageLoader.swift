@@ -6,7 +6,7 @@
 
 import SwiftUI
 
-private var cache: [String: Image] = [:]
+@MainActor private var cache: [String: Image] = [:]
 
 final class ImageCache {
     
@@ -22,11 +22,10 @@ final class ImageCache {
         self.enabledLogs = enabledLogs
     }
     
-    @MainActor
     func getImage(url: URL?) async -> Image? {
         guard let url else { return nil }
         
-        if let localImage = fetchImageFromLocal(for: getID(for: url)) {
+        if let localImage = await fetchImageFromLocal(for: getID(for: url)) {
             return localImage
         } else {
             return await fetchImageFromNetwork(for: url)
@@ -37,6 +36,7 @@ final class ImageCache {
 
 private extension ImageCache {
  
+    @MainActor
     func fetchImageFromLocal(for id: String) -> Image? {
         if let image = cache[id] {
             return image
@@ -67,6 +67,7 @@ private extension ImageCache {
         }
     }
     
+    @MainActor
     func fetchImageFromNetwork(for url: URL?) async -> Image? {
         guard let url else { return nil }
         
