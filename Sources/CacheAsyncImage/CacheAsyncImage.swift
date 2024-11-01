@@ -8,10 +8,10 @@ import SwiftUI
 
 public struct CacheAsyncImage<I: View, P: View, E: View>: View {
     
-    let url: URL?
-    @ViewBuilder let image: (Image) -> I
-    @ViewBuilder let placeholder: () -> P
-    @ViewBuilder let error: () -> E
+    private let url: URL?
+    @ViewBuilder private let image: (Image) -> I
+    @ViewBuilder private let placeholder: () -> P
+    @ViewBuilder private let error: () -> E
     
     private let imageCache: ImageCache
     

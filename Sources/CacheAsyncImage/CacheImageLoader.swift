@@ -22,10 +22,11 @@ final class ImageCache {
         self.enabledLogs = enabledLogs
     }
     
+    @MainActor
     func getImage(url: URL?) async -> Image? {
         guard let url else { return nil }
         
-        if let localImage = await fetchImageFromLocal(for: getID(for: url)) {
+        if let localImage = fetchImageFromLocal(for: getID(for: url)) {
             return localImage
         } else {
             return await fetchImageFromNetwork(for: url)
